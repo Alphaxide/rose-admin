@@ -2,6 +2,7 @@
 
 import { Customer } from '@/lib/mock-data'
 import { Card } from '@/components/ui/card'
+import Link from 'next/link'
 
 interface CustomersTableProps {
   customers: Customer[]
@@ -26,9 +27,13 @@ export function CustomersTable({ customers }: CustomersTableProps) {
             {customers.map((customer) => (
               <tr
                 key={customer.id}
-                className="border-b border-border hover:bg-muted/50 transition-colors"
+                className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <td className="px-6 py-4 font-medium">{customer.fullName}</td>
+                <td className="px-6 py-4 font-medium">
+                  <Link href={`/admin/customers/${customer.id}`} className="hover:text-blue-600">
+                    {customer.fullName}
+                  </Link>
+                </td>
                 <td className="px-6 py-4 text-sm text-muted-foreground">{customer.email}</td>
                 <td className="px-6 py-4 text-sm">{customer.phone}</td>
                 <td className="px-6 py-4">

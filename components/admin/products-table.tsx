@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface ProductsTableProps {
   products: Product[]
@@ -27,22 +28,24 @@ export function ProductsTable({ products }: ProductsTableProps) {
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product.id} className="border-b border-border hover:bg-muted/50 transition-colors">
+              <tr key={product.id} className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer">
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded overflow-hidden">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
+                  <Link href={`/admin/products/${product.id}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-10 h-10 rounded overflow-hidden">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium hover:text-blue-600">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">{product.categoryId}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">{product.categoryId}</p>
-                    </div>
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-6 py-4 text-sm">
                   {product.categoryId === 1 && 'Skincare'}
