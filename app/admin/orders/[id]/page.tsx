@@ -38,7 +38,7 @@ interface OrderDetail {
     zipCode: string
     totalOrders: number
     totalSpent: number
-    joinedAt: string
+    createdAt: string
   }
 }
 

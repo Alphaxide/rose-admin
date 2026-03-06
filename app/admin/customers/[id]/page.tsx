@@ -19,7 +19,7 @@ interface CustomerDetail {
   zipCode: string
   totalOrders: number
   totalSpent: number
-  joinedAt: string
+  createdAt: string
   orders?: Array<{
     id: number
     orderNumber: string
@@ -189,11 +189,11 @@ export default function CustomerDetailPage() {
               <h3 className="font-semibold">Member Since</h3>
             </div>
             <p className="text-2xl font-bold">
-              {new Date(customer.joinedAt).toLocaleDateString()}
+              {new Date(customer.createdAt).toLocaleDateString()}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {Math.floor(
-                (Date.now() - new Date(customer.joinedAt).getTime()) /
+                (Date.now() - new Date(customer.createdAt).getTime()) /
                   (1000 * 60 * 60 * 24)
               )}{' '}
               days ago
