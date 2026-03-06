@@ -13,19 +13,19 @@ export function ProtectedAdmin({ children }: ProtectedAdminProps) {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setMounted(true)
-    setLoading(false)
+  }, [])
 
-    if (!isAuthenticated && mounted) {
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
       router.push('/login')
     }
   }, [isAuthenticated, mounted, router])
 
   // Show skeleton during initial mount to prevent hydration mismatch
-  if (!mounted || loading) {
+  if (!mounted) {
     return (
       <div className="flex">
         <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col fixed left-0 top-0">
@@ -45,7 +45,12 @@ export function ProtectedAdmin({ children }: ProtectedAdminProps) {
   }
 
   if (!isAuthenticated) {
-    return null
+    return (
+      <div className="flex">
+        <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col fixed left-0 top-0" />
+        <main className="ml-64 flex-1 min-h-screen bg-background" />
+      </div>
+    )
   }
 
   return (
