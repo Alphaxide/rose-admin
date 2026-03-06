@@ -32,13 +32,17 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <td className="px-6 py-4">
                   <Link href={`/admin/products/${product.id}`}>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded overflow-hidden">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
+                      <div className="relative w-10 h-10 rounded overflow-hidden bg-muted">
+                        {product.image ? (
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted" />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium hover:text-blue-600">{product.name}</p>

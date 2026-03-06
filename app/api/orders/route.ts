@@ -1,14 +1,13 @@
-import { mockOrders } from '@/lib/mock-data'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
 
-  let orders = mockOrders
+  const { data, error } = await supabaseAdmin.rpc('get_orders', {
+    status_filter: status ?? null,
+  })
 
-  if (status) {
-    orders = orders.filter((o) => o.status === status)
-  }
-
-  return Response.json(orders)
+  if (error) return Response.json({ error: error.message }, { status: 500 })
+  return Response.json(data)
 }

@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockProducts, mockCategories } from '@/lib/mock-data'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const productId = parseInt(params.id)
-  const product = mockProducts.find(p => p.id === productId)
-  
-  if (!product) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-  }
+  const { id } = await params
 
-  const category = mockCategories.find(c => c.id === product.categoryId)
+  const { data, error } = await supabaseAdmin.rpc('get_product_by_id', {
+    p_id: parseInt(id),
+  })
 
-  return NextResponse.json({ ...product, category })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+
+  return NextResponse.json(data)
 }
