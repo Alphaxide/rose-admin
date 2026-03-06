@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -15,14 +15,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<{ email: string; name: string } | null>(null)
 
+  // Initialize from sessionStorage on mount
+  useEffect(() => {
+    const stored = sessionStorage.getItem('auth')
+    if (stored) {
+      try {
+        const data = JSON.parse(stored)
+        setIsAuthenticated(data.isAuthenticated)
+        setUser(data.user)
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+  }, [])
+
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - accept any email/password
     if (email && password) {
-      setIsAuthenticated(true)
-      setUser({
+      const userData = {
         email,
         name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-      })
+      }
+      setIsAuthenticated(true)
+      setUser(userData)
+      sessionStorage.setItem('auth', JSON.stringify({ isAuthenticated: true, user: userData }))
       return true
     }
     return false
@@ -31,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setIsAuthenticated(false)
     setUser(null)
+    sessionStorage.removeItem('auth')
   }
 
   return (

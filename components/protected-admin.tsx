@@ -12,51 +12,31 @@ interface ProtectedAdminProps {
 export function ProtectedAdmin({ children }: ProtectedAdminProps) {
   const { isAuthenticated } = useAuth()
   const router = useRouter()
-  const [mounted, setMounted] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (mounted && !isAuthenticated) {
+    setIsReady(true)
+    
+    // Check auth after component mounts
+    if (!isAuthenticated) {
       router.push('/login')
     }
-  }, [isAuthenticated, mounted, router])
+  }, [isAuthenticated, router])
 
-  // Show skeleton during initial mount to prevent hydration mismatch
-  if (!mounted) {
+  // While checking auth, show loading state that matches the final render
+  if (!isReady || !isAuthenticated) {
     return (
-      <div className="flex">
-        <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col fixed left-0 top-0">
-          <div className="p-6 border-b border-sidebar-border">
-            <div className="h-8 bg-sidebar-accent rounded w-32 mb-2" />
-            <div className="h-3 bg-sidebar-accent rounded w-24" />
-          </div>
-        </div>
-        <main className="ml-64 flex-1 min-h-screen bg-background p-8">
-          <div className="space-y-4">
-            <div className="h-10 bg-muted rounded w-1/3" />
-            <div className="h-64 bg-muted rounded" />
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex">
-        <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col fixed left-0 top-0" />
-        <main className="ml-64 flex-1 min-h-screen bg-background" />
+      <div className="flex min-h-screen">
+        <aside className="w-64 bg-sidebar border-r border-sidebar-border" />
+        <main className="flex-1 bg-background" />
       </div>
     )
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main className="ml-64 flex-1 min-h-screen bg-background">
+      <main className="flex-1 ml-64 bg-background">
         {children}
       </main>
     </div>
