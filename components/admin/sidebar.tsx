@@ -3,15 +3,16 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Package, ShoppingCart, Users, Shapes, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, Shapes, LogOut, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 const menuItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', active: 'exact' },
-  { href: '/admin/products', icon: Package, label: 'Products', active: 'startsWith' },
-  { href: '/admin/orders', icon: ShoppingCart, label: 'Orders', active: 'startsWith' },
-  { href: '/admin/customers', icon: Users, label: 'Customers', active: 'startsWith' },
-  { href: '/admin/categories', icon: Shapes, label: 'Categories', active: 'startsWith' },
+  { href: '/admin',             icon: LayoutDashboard, label: 'Dashboard',   active: 'exact' },
+  { href: '/admin/products',    icon: Package,         label: 'Products',    active: 'startsWith' },
+  { href: '/admin/orders',      icon: ShoppingCart,    label: 'Orders',      active: 'startsWith' },
+  { href: '/admin/customers',   icon: Users,           label: 'Customers',   active: 'startsWith' },
+  { href: '/admin/categories',  icon: Shapes,          label: 'Categories',  active: 'startsWith' },
+  { href: '/admin/admin-users', icon: ShieldCheck,     label: 'Admin Users', active: 'startsWith' },
 ]
 
 export function Sidebar() {

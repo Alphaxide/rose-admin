@@ -83,7 +83,10 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Table */}
-      <ProductsTable products={filteredProducts} />
+      <ProductsTable
+        products={filteredProducts}
+        onProductDeleted={(id) => setProducts((prev) => prev.filter((p) => p.id !== id))}
+      />
     </div>
   )
 }

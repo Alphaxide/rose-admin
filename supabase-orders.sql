@@ -64,44 +64,49 @@ DECLARE
   result json;
 BEGIN
   SELECT json_build_object(
-    'id',            o.id,
-    'orderNumber',   o.order_number,
-    'userId',        o.user_id,
-    'customerName',  COALESCE(o.ship_full_name, ''),
-    'customerEmail', COALESCE(o.ship_email, ''),
-    'subtotal',      o.subtotal,
-    'tax',           o.tax,
-    'shipping',      o.shipping,
-    'total',         o.total,
-    'status',        o.status,
-    'paymentMethod', o.payment_method,
-    'trackingNumber',o.tracking_number,
-    'createdAt',     o.created_at,
-    'items',         COALESCE(
-                       (SELECT json_agg(
-                         json_build_object(
-                           'id',        oi.id,
-                           'orderId',   oi.order_id,
-                           'productId', oi.product_id,
-                           'name',      oi.name,
-                           'price',     oi.price,
-                           'quantity',  oi.quantity
-                         ) ORDER BY oi.id
-                       )
-                       FROM order_items oi
-                       WHERE oi.order_id = o.id),
-                       '[]'::json
-                     ),
-    'customer',      (
-                       SELECT json_build_object(
-                         'id',       u.id,
-                         'email',    u.email,
-                         'fullName', COALESCE(u.full_name, ''),
-                         'phone',    COALESCE(u.phone, '')
-                       )
-                       FROM users u
-                       WHERE u.id = o.user_id
-                     )
+    'id',             o.id,
+    'orderNumber',    o.order_number,
+    'userId',         o.user_id,
+    'customerName',   COALESCE(o.ship_full_name, ''),
+    'customerEmail',  COALESCE(o.ship_email, ''),
+    'shipPhone',          COALESCE(o.ship_phone, ''),
+    'shipAddress',        COALESCE(o.ship_address, ''),
+    'shipCity',           COALESCE(o.ship_city, ''),
+    'shipPostal',         COALESCE(o.ship_postal, ''),
+    'subtotal',           o.subtotal,
+    'tax',                o.tax,
+    'shipping',           o.shipping,
+    'total',              o.total,
+    'status',             o.status,
+    'paymentMethod',      COALESCE(o.payment_method, ''),
+    'trackingNumber',     COALESCE(o.tracking_number, ''),
+    'estimatedDelivery',  o.estimated_delivery,
+    'createdAt',          o.created_at,
+    'items',          COALESCE(
+                        (SELECT json_agg(
+                          json_build_object(
+                            'id',        oi.id,
+                            'orderId',   oi.order_id,
+                            'productId', oi.product_id,
+                            'name',      oi.name,
+                            'price',     oi.price,
+                            'quantity',  oi.quantity
+                          ) ORDER BY oi.id
+                        )
+                        FROM order_items oi
+                        WHERE oi.order_id = o.id),
+                        '[]'::json
+                      ),
+    'customer',       (
+                        SELECT json_build_object(
+                          'id',       u.id,
+                          'email',    u.email,
+                          'fullName', COALESCE(u.full_name, ''),
+                          'phone',    COALESCE(u.phone, '')
+                        )
+                        FROM users u
+                        WHERE u.id = o.user_id
+                      )
   )
   INTO result
   FROM orders o

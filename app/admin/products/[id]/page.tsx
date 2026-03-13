@@ -5,7 +5,18 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, ArrowLeft, AlertCircle } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Star, ArrowLeft, AlertCircle, Pencil, Trash2, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 interface ProductDetail {
@@ -35,6 +46,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<ProductDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,6 +64,21 @@ export default function ProductDetailPage() {
 
     fetchProduct()
   }, [params.id])
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/products/${params.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to delete product')
+      }
+      router.push('/admin/products')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed')
+      setDeleting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -124,11 +151,11 @@ export default function ProductDetailPage() {
             <h3 className="text-sm font-semibold mb-3">Pricing</h3>
             <div className="space-y-2">
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
+                <span className="text-2xl font-bold">KES {product.price.toLocaleString()}</span>
                 {product.originalPrice && (
                   <>
                     <span className="text-sm line-through text-muted-foreground">
-                      ${product.originalPrice.toFixed(2)}
+                      KES {product.originalPrice.toLocaleString()}
                     </span>
                     <Badge variant="secondary">{discount}% off</Badge>
                   </>
@@ -199,8 +226,43 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="flex gap-3 mt-6 pt-6 border-t border-border">
-          <Button variant="outline">Edit Product</Button>
-          <Button variant="destructive">Delete Product</Button>
+          <Button
+            onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+            className="gap-2"
+          >
+            <Pencil className="w-4 h-4" />
+            Edit Product
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="gap-2" disabled={deleting}>
+                {deleting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Delete Product
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete &quot;{product.name}&quot;?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The product and all its associated images will be permanently removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </Card>
     </div>

@@ -1,17 +1,51 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Product } from '@/lib/mock-data'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Star } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { Star, Pencil, Trash2, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 interface ProductsTableProps {
   products: Product[]
+  onProductDeleted?: (id: number) => void
 }
 
-export function ProductsTable({ products }: ProductsTableProps) {
+export function ProductsTable({ products, onProductDeleted }: ProductsTableProps) {
+  const router = useRouter()
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+
+  async function handleDelete(id: number) {
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Delete failed')
+      }
+      onProductDeleted?.(id)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <Card>
       <div className="overflow-x-auto">
@@ -24,15 +58,16 @@ export function ProductsTable({ products }: ProductsTableProps) {
               <th className="text-left px-6 py-4 font-semibold">Stock</th>
               <th className="text-left px-6 py-4 font-semibold">Rating</th>
               <th className="text-left px-6 py-4 font-semibold">Status</th>
+              <th className="text-left px-6 py-4 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product.id} className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer">
+              <tr key={product.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                 <td className="px-6 py-4">
                   <Link href={`/admin/products/${product.id}`}>
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded overflow-hidden bg-muted">
+                      <div className="relative w-10 h-10 rounded overflow-hidden bg-muted flex-shrink-0">
                         {product.image ? (
                           <Image
                             src={product.image}
@@ -45,8 +80,8 @@ export function ProductsTable({ products }: ProductsTableProps) {
                         )}
                       </div>
                       <div>
-                        <p className="font-medium hover:text-blue-600">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">{product.categoryId}</p>
+                        <p className="font-medium hover:text-primary">{product.name}</p>
+                        <p className="text-xs text-muted-foreground">ID: {product.id}</p>
                       </div>
                     </div>
                   </Link>
@@ -89,6 +124,54 @@ export function ProductsTable({ products }: ProductsTableProps) {
                   >
                     {product.inStock ? 'In Stock' : 'Out of Stock'}
                   </Badge>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                      onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+                      title="Edit product"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={deletingId === product.id}
+                          title="Delete product"
+                        >
+                          {deletingId === product.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete &quot;{product.name}&quot;?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. The product will be permanently removed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(product.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </td>
               </tr>
             ))}
