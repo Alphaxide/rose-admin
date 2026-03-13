@@ -1,40 +1,78 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+
+interface AdminUser {
+  id: number
+  email: string
+  fullName: string
+}
 
 interface AuthContextType {
   isAuthenticated: boolean
-  user: { email: string; name: string } | null
-  login: (email: string, password: string) => Promise<boolean>
+  user: AdminUser | null
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
+  loading: boolean
 }
+
+const STORAGE_KEY = 'admin_session'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [user, setUser] = useState<{ email: string; name: string } | null>(null)
+  const [user, setUser] = useState<AdminUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - accept any email/password
-    if (email && password) {
-      setIsAuthenticated(true)
-      setUser({
-        email,
-        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
-      })
-      return true
+  // Rehydrate session from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as AdminUser
+        if (parsed?.id && parsed?.email) {
+          setUser(parsed)
+        }
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    } finally {
+      setLoading(false)
     }
-    return false
+  }, [])
+
+  const login = async (email: string, password: string) => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        return { success: false, error: data.error || 'Login failed' }
+      }
+
+      const adminUser: AdminUser = { id: data.id, email: data.email, fullName: data.fullName }
+      setUser(adminUser)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminUser))
+      return { success: true }
+    } catch {
+      return { success: false, error: 'Network error. Please try again.' }
+    }
   }
 
   const logout = () => {
-    setIsAuthenticated(false)
     setUser(null)
+    localStorage.removeItem(STORAGE_KEY)
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated: !!user, user, login, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   )
