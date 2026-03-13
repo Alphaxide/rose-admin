@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, Package, ShoppingCart, Users, Shapes, LogOut, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, Shapes, LogOut, ShieldCheck, Settings } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 const menuItems = [
@@ -13,6 +14,7 @@ const menuItems = [
   { href: '/admin/customers',   icon: Users,           label: 'Customers',   active: 'startsWith' },
   { href: '/admin/categories',  icon: Shapes,          label: 'Categories',  active: 'startsWith' },
   { href: '/admin/admin-users', icon: ShieldCheck,     label: 'Admin Users', active: 'startsWith' },
+  { href: '/admin/settings',   icon: Settings,         label: 'Settings',    active: 'startsWith' },
 ]
 
 export function Sidebar() {
@@ -28,9 +30,12 @@ export function Sidebar() {
   return (
     <aside className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col fixed left-0 top-0">
       {/* Logo */}
-      <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-2xl font-bold text-sidebar-primary">BeautyByRose</h1>
-        <p className="text-xs text-sidebar-accent-foreground mt-1">Admin Dashboard</p>
+      <div className="p-6 border-b border-sidebar-border flex items-center gap-3">
+        <Image src="/rose.png" alt="BeautyByRose" width={40} height={40} className="rounded-lg flex-shrink-0" />
+        <div>
+          <h1 className="text-lg font-bold text-sidebar-primary leading-tight">BeautyByRose</h1>
+          <p className="text-xs text-sidebar-accent-foreground">Admin Dashboard</p>
+        </div>
       </div>
 
       {/* Navigation */}
