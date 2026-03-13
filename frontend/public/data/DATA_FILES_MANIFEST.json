@@ -1,0 +1,361 @@
+{
+  "manifest": {
+    "version": "1.0.0",
+    "date": "2024-02-27",
+    "description": "Complete manifest of all seed data and configuration files for BeautyHub",
+    "project": "BeautyHub E-Commerce Platform"
+  },
+  "data_files": {
+    "products": {
+      "file": "products.json",
+      "type": "JSON",
+      "description": "Sample product data with 12 beauty products",
+      "structure": {
+        "success": "boolean",
+        "data": "array of Product objects",
+        "total": "number",
+        "pagination": "pagination metadata"
+      },
+      "fields_per_product": [
+        "id",
+        "name",
+        "slug",
+        "price",
+        "original_price",
+        "image_urls",
+        "thumbnail_url",
+        "category_id",
+        "rating",
+        "review_count",
+        "stock_quantity",
+        "description",
+        "in_stock",
+        "features"
+      ],
+      "sample_count": 12,
+      "categories_represented": [
+        "Skincare (5 products)",
+        "Makeup (4 products)",
+        "Haircare (2 products)",
+        "Body Care (1 product)",
+        "Fragrances (1 product)"
+      ],
+      "price_range_kes": "950 - 3500",
+      "use_case": "Product listings, search results, filtering"
+    },
+    "categories": {
+      "file": "categories.json",
+      "type": "JSON",
+      "description": "5 product categories with metadata",
+      "structure": {
+        "success": "boolean",
+        "data": "array of Category objects"
+      },
+      "fields_per_category": [
+        "id",
+        "name",
+        "slug",
+        "image",
+        "description",
+        "productCount"
+      ],
+      "categories": [
+        "Skincare",
+        "Makeup",
+        "Haircare",
+        "Body Care",
+        "Fragrances"
+      ],
+      "use_case": "Category browsing, filtering, navigation"
+    }
+  },
+  "documentation_files": {
+    "readme": {
+      "file": "README.md",
+      "type": "Markdown",
+      "description": "Main documentation hub with navigation and quick reference",
+      "sections": [
+        "Quick navigation",
+        "Files overview",
+        "Getting started",
+        "Data structure reference",
+        "Key features",
+        "API endpoints",
+        "Components guide",
+        "Testing guide",
+        "Troubleshooting"
+      ],
+      "lines": 358,
+      "target_audience": "All developers"
+    },
+    "system_overview": {
+      "file": "SYSTEM_OVERVIEW.md",
+      "type": "Markdown",
+      "description": "Complete system architecture and features documentation",
+      "sections": [
+        "Project architecture",
+        "Tech stack",
+        "Directory structure",
+        "Core features",
+        "Data flow",
+        "Mock API service",
+        "Seed data structure",
+        "State management",
+        "Responsive design",
+        "Performance optimizations",
+        "Integration points",
+        "Testing strategy",
+        "Deployment checklist"
+      ],
+      "lines": 510,
+      "target_audience": "Architects, senior developers, frontend leads"
+    },
+    "api_integration_guide": {
+      "file": "API_INTEGRATION_GUIDE.md",
+      "type": "Markdown",
+      "description": "Step-by-step guide for integrating backend API with frontend",
+      "sections": [
+        "Overview",
+        "Current architecture",
+        "Integration steps",
+        "Environment configuration",
+        "Error handling",
+        "API endpoints reference",
+        "Frontend components using API",
+        "Data flow examples",
+        "Testing integration",
+        "Common issues and solutions",
+        "Performance considerations",
+        "Deployment checklist"
+      ],
+      "lines": 370,
+      "target_audience": "Backend developers, full-stack engineers"
+    },
+    "seed_data_readme": {
+      "file": "SEED_DATA_README.md",
+      "type": "Markdown",
+      "description": "Complete guide to seed data management and modification",
+      "sections": [
+        "Files overview",
+        "Data structure",
+        "Seed data features",
+        "Usage in frontend",
+        "Modifying seed data",
+        "Integration with backend",
+        "Image guidelines",
+        "Validation",
+        "Best practices",
+        "Data integrity checks"
+      ],
+      "lines": 280,
+      "target_audience": "Data managers, content teams, developers"
+    },
+    "checkout_flow_guide": {
+      "file": "CHECKOUT_FLOW_GUIDE.md",
+      "type": "Markdown",
+      "description": "Detailed documentation of the checkout process and payment flow",
+      "sections": [
+        "Flow diagram",
+        "Implementation details",
+        "Step 1: Shipping",
+        "Step 2: Payment",
+        "Step 3: Confirmation",
+        "State management",
+        "API integration",
+        "Form handling",
+        "Loading states",
+        "Error handling",
+        "User experience enhancements",
+        "Mobile responsiveness",
+        "Security considerations",
+        "Testing checklist",
+        "Future enhancements"
+      ],
+      "lines": 408,
+      "target_audience": "Payment engineers, UX designers, QA testers"
+    },
+    "api_schema": {
+      "file": "API_SCHEMA.json",
+      "type": "JSON",
+      "description": "Complete formal API specification and contract between frontend and backend",
+      "endpoints": [
+        "GET /api/categories",
+        "GET /api/products",
+        "GET /api/products/:id",
+        "POST /api/search",
+        "POST /api/orders",
+        "POST /api/payments/initiate",
+        "POST /api/payments/confirm",
+        "POST /api/wishlist",
+        "DELETE /api/wishlist/:productId"
+      ],
+      "includes": [
+        "Request schemas",
+        "Response schemas",
+        "Query parameters",
+        "Error responses",
+        "Authentication info",
+        "Field descriptions"
+      ],
+      "target_audience": "Backend developers, API architects"
+    }
+  },
+  "file_structure": {
+    "root": "/vercel/share/v0-project/",
+    "data_directory": "/public/data/",
+    "total_files": 7,
+    "total_documentation_lines": 2300,
+    "files_by_type": {
+      "json": [
+        "products.json",
+        "categories.json",
+        "API_SCHEMA.json",
+        "DATA_FILES_MANIFEST.json"
+      ],
+      "markdown": [
+        "README.md",
+        "SYSTEM_OVERVIEW.md",
+        "API_INTEGRATION_GUIDE.md",
+        "SEED_DATA_README.md",
+        "CHECKOUT_FLOW_GUIDE.md"
+      ]
+    }
+  },
+  "quick_reference": {
+    "what_file_should_i_read": {
+      "i_want_to_understand_the_system": "SYSTEM_OVERVIEW.md",
+      "i_need_to_integrate_with_backend": "API_INTEGRATION_GUIDE.md",
+      "i_want_to_manage_product_data": "SEED_DATA_README.md",
+      "i_need_to_understand_checkout": "CHECKOUT_FLOW_GUIDE.md",
+      "i_want_to_see_api_specs": "API_SCHEMA.json",
+      "i_need_quick_help": "README.md",
+      "i_want_a_project_summary": "SYSTEM_OVERVIEW.md"
+    },
+    "data_samples": {
+      "view_product_data": "products.json (12 products)",
+      "view_categories": "categories.json (5 categories)",
+      "understand_api_format": "API_SCHEMA.json",
+      "see_expected_responses": "API_SCHEMA.json"
+    },
+    "by_role": {
+      "frontend_developer": [
+        "README.md",
+        "SYSTEM_OVERVIEW.md",
+        "SEED_DATA_README.md"
+      ],
+      "backend_developer": [
+        "API_SCHEMA.json",
+        "API_INTEGRATION_GUIDE.md"
+      ],
+      "full_stack_engineer": [
+        "SYSTEM_OVERVIEW.md",
+        "API_INTEGRATION_GUIDE.md",
+        "API_SCHEMA.json"
+      ],
+      "product_manager": [
+        "SYSTEM_OVERVIEW.md",
+        "CHECKOUT_FLOW_GUIDE.md"
+      ],
+      "qa_engineer": [
+        "README.md",
+        "CHECKOUT_FLOW_GUIDE.md",
+        "SYSTEM_OVERVIEW.md"
+      ],
+      "data_manager": [
+        "SEED_DATA_README.md",
+        "products.json",
+        "categories.json"
+      ]
+    }
+  },
+  "key_information": {
+    "currency": "KES (Kenyan Shillings)",
+    "phone_format": "+254XXXXXXXXX or 0XXXXXXXXX",
+    "default_timeout": "10000ms",
+    "mock_api_delay": "300ms",
+    "shipping_fee": "300 KES (free over 5000 KES)",
+    "tax_rate": "16%",
+    "number_of_products": 12,
+    "number_of_categories": 5,
+    "number_of_api_endpoints": 9,
+    "search_supported_fields": [
+      "Product name",
+      "Product description",
+      "Product features"
+    ],
+    "sort_options": [
+      "newest",
+      "price-low",
+      "price-high",
+      "rating"
+    ]
+  },
+  "integration_checklist": {
+    "before_backend_integration": [
+      "Read API_INTEGRATION_GUIDE.md",
+      "Review API_SCHEMA.json",
+      "Understand data structures in products.json and categories.json",
+      "Check mock API implementation in lib/mockApi.ts"
+    ],
+    "during_backend_integration": [
+      "Create API endpoints per API_SCHEMA.json",
+      "Update lib/mockApi.ts to call real API",
+      "Configure environment variables",
+      "Test each endpoint individually",
+      "Implement error handling",
+      "Add authentication if needed"
+    ],
+    "after_integration": [
+      "Test checkout flow end-to-end",
+      "Verify CORS configuration",
+      "Test on mobile devices",
+      "Check performance metrics",
+      "Load test with expected volume",
+      "Monitor for errors in production"
+    ]
+  },
+  "helpful_links": {
+    "source_files": {
+      "api_service": "lib/mockApi.ts",
+      "checkout_page": "app/checkout/page.tsx",
+      "search_page": "app/search/page.tsx",
+      "products_page": "app/products/page.tsx",
+      "search_component": "components/SearchBar.tsx",
+      "product_card": "components/ProductCard.tsx"
+    },
+    "contexts": {
+      "cart_context": "context/CartContext.tsx",
+      "wishlist_context": "context/WishlistContext.tsx"
+    }
+  },
+  "statistics": {
+    "total_documentation_files": 5,
+    "total_data_files": 2,
+    "total_lines_of_documentation": 2300,
+    "api_endpoints_specified": 9,
+    "sample_products": 12,
+    "sample_categories": 5,
+    "components_documented": 10,
+    "pages_documented": 8,
+    "validation_rules_documented": 15
+  },
+  "version_info": {
+    "version": "1.0.0",
+    "status": "Production Ready",
+    "last_updated": "2024-02-27",
+    "next_version_planned": "1.1.0 (with real API integration)",
+    "maintenance_schedule": "As needed",
+    "support_level": "Full"
+  },
+  "notes": [
+    "All prices are in Kenyan Shillings (KES)",
+    "Phone number validation specific to Kenya (+254 or 0 format)",
+    "Mock API includes realistic delays (300ms) to simulate real API",
+    "All data files are in JSON format for easy backend integration",
+    "Documentation includes code examples and troubleshooting guides",
+    "API schema can be used as contract between frontend and backend",
+    "Search functionality supports partial matching and feature matching",
+    "Checkout includes proper form validation and error handling",
+    "Mobile responsive design implemented throughout"
+  ]
+}

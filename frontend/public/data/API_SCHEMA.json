@@ -1,0 +1,217 @@
+{
+  "title": "BeautyHub API Schema",
+  "description": "Expected API response formats for BeautyHub e-commerce platform",
+  "version": "1.0.0",
+  "endpoints": {
+    "GET /api/categories": {
+      "description": "Fetch all product categories",
+      "response": {
+        "success": true,
+        "data": [
+          {
+            "id": "string - unique identifier",
+            "name": "string - category name",
+            "slug": "string - url-friendly slug",
+            "image": "string - image URL",
+            "description": "string - category description",
+            "productCount": "number - count of products in category"
+          }
+        ]
+      }
+    },
+    "GET /api/products": {
+      "description": "Fetch products with optional filters",
+      "query_params": {
+        "categoryId": "string (optional) - filter by category",
+        "searchQuery": "string (optional) - search by name/description",
+        "sortBy": "string (optional) - 'newest' | 'price-low' | 'price-high' | 'rating'",
+        "priceMin": "number (optional) - minimum price",
+        "priceMax": "number (optional) - maximum price",
+        "page": "number (optional) - pagination page, default 1",
+        "limit": "number (optional) - items per page, default 12"
+      },
+      "response": {
+        "success": true,
+        "data": [
+          {
+            "id": "string - unique product identifier",
+            "name": "string - product name",
+            "slug": "string - url-friendly slug",
+            "price": "number - current price in KES",
+            "original_price": "number - original price (for discount calculation)",
+            "image_urls": ["string - array of image URLs"],
+            "thumbnail_url": "string - primary image URL",
+            "category_id": "string - category identifier",
+            "rating": "number - average rating 0-5",
+            "review_count": "number - total reviews",
+            "stock_quantity": "number - available stock",
+            "description": "string - product description",
+            "in_stock": "boolean - stock availability",
+            "features": ["string - product features array"]
+          }
+        ],
+        "total": "number - total products matching query",
+        "pagination": {
+          "page": "number",
+          "limit": "number",
+          "total_pages": "number"
+        }
+      }
+    },
+    "GET /api/products/:id": {
+      "description": "Fetch single product details",
+      "response": {
+        "success": true,
+        "data": {
+          "id": "string",
+          "name": "string",
+          "slug": "string",
+          "price": "number",
+          "original_price": "number",
+          "image_urls": ["string"],
+          "thumbnail_url": "string",
+          "category_id": "string",
+          "rating": "number",
+          "review_count": "number",
+          "stock_quantity": "number",
+          "description": "string",
+          "in_stock": "boolean",
+          "features": ["string"],
+          "seller": {
+            "name": "string - seller name",
+            "rating": "number - seller rating",
+            "reviews": "number - seller review count"
+          }
+        }
+      }
+    },
+    "POST /api/search": {
+      "description": "Search products by query",
+      "request_body": {
+        "query": "string - search term",
+        "filters": {
+          "categoryId": "string (optional)",
+          "priceRange": [0, 5000],
+          "inStock": "boolean (optional)"
+        }
+      },
+      "response": {
+        "success": true,
+        "data": ["array of matching products"],
+        "total": "number - total matches"
+      }
+    },
+    "POST /api/orders": {
+      "description": "Create a new order",
+      "request_body": {
+        "items": [
+          {
+            "product_id": "string",
+            "quantity": "number",
+            "price": "number"
+          }
+        ],
+        "shippingAddress": {
+          "firstName": "string",
+          "lastName": "string",
+          "email": "string",
+          "phone": "string",
+          "address": "string",
+          "city": "string",
+          "postalCode": "string"
+        },
+        "paymentMethod": "string - 'mpesa' | 'card'",
+        "totalAmount": "number"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "orderId": "string - unique order identifier",
+          "status": "string - 'pending' | 'confirmed' | 'shipped' | 'delivered'",
+          "items": ["array of order items"],
+          "shippingAddress": "object",
+          "paymentMethod": "string",
+          "totalAmount": "number",
+          "createdAt": "string - ISO timestamp",
+          "estimatedDelivery": "string - ISO timestamp"
+        }
+      }
+    },
+    "POST /api/payments/initiate": {
+      "description": "Initiate M-Pesa payment",
+      "request_body": {
+        "orderId": "string",
+        "amount": "number",
+        "phoneNumber": "string - M-Pesa phone number",
+        "paymentMethod": "string - 'mpesa'"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "transactionId": "string",
+          "status": "string - 'initiated' | 'pending' | 'completed' | 'failed'",
+          "message": "string - status message",
+          "amount": "number",
+          "phoneNumber": "string",
+          "paymentMethod": "string"
+        }
+      }
+    },
+    "POST /api/payments/confirm": {
+      "description": "Confirm payment status",
+      "request_body": {
+        "transactionId": "string"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "transactionId": "string",
+          "status": "string - 'completed'",
+          "message": "string",
+          "timestamp": "string - ISO timestamp"
+        }
+      }
+    },
+    "POST /api/wishlist": {
+      "description": "Add product to wishlist",
+      "request_body": {
+        "productId": "string",
+        "userId": "string (optional)"
+      },
+      "response": {
+        "success": true,
+        "data": {
+          "wishlistId": "string",
+          "productId": "string",
+          "addedAt": "string - ISO timestamp"
+        }
+      }
+    },
+    "DELETE /api/wishlist/:productId": {
+      "description": "Remove product from wishlist",
+      "response": {
+        "success": true,
+        "message": "string"
+      }
+    }
+  },
+  "error_response": {
+    "success": false,
+    "error": "string - error message",
+    "code": "string - error code"
+  },
+  "authentication": {
+    "type": "JWT or Session-based",
+    "headers": {
+      "Authorization": "Bearer <token>"
+    }
+  },
+  "notes": [
+    "All prices are in Kenyan Shillings (KES)",
+    "Timestamps are in ISO 8601 format",
+    "All endpoints should implement rate limiting",
+    "Images should be served from CDN for optimal performance",
+    "Implement caching for categories and products endpoints",
+    "Search endpoint should support full-text search on product names and descriptions"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "name": "Skincare",
+      "slug": "skincare",
+      "image": "/category-skincare.jpg",
+      "description": "Premium skincare products for all skin types",
+      "productCount": 18
+    },
+    {
+      "id": "2",
+      "name": "Makeup",
+      "slug": "makeup",
+      "image": "/category-makeup.jpg",
+      "description": "High-quality makeup and cosmetics",
+      "productCount": 22
+    },
+    {
+      "id": "3",
+      "name": "Haircare",
+      "slug": "haircare",
+      "image": "/category-haircare.jpg",
+      "description": "Professional hair care solutions",
+      "productCount": 15
+    },
+    {
+      "id": "4",
+      "name": "Body Care",
+      "slug": "body-care",
+      "image": "/category-bodycare.jpg",
+      "description": "Nourishing body care products",
+      "productCount": 12
+    },
+    {
+      "id": "5",
+      "name": "Fragrances",
+      "slug": "fragrances",
+      "image": "/category-fragrances.jpg",
+      "description": "Elegant fragrances and perfumes",
+      "productCount": 10
+    }
+  ]
+}
