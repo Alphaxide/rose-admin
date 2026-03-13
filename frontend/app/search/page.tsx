@@ -7,9 +7,9 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 
-// ── Real backend (same as SearchBar) ──────────────────────────────────────────
-const FUNCTION_URL = 'https://nlsyuzhycuojnjdrykkg.supabase.co/functions/v1/web-swift'
-const ANON_KEY     = 'sb_publishable_z2IhNVEauBE0KSv6HS3F_g_yXTcrTfJ'
+// ── Search backend ─────────────────────────────────────────────────────────────
+const FUNCTION_URL = process.env.NEXT_PUBLIC_SEARCH_FUNCTION_URL!
+const ANON_KEY     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 interface Product {
   id: string
