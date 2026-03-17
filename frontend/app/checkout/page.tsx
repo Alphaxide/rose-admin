@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Check, ShoppingBag, MapPin, Phone, Mail, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Loader2, Check, ShoppingBag, MapPin, Phone, Mail, MessageSquare, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -74,6 +74,7 @@ export default function CheckoutPage() {
   const [shippingData, setShippingData] = useState<ShippingData>({
     fullName: '', email: '', phone: '', address: '', city: '', postalCode: '',
   })
+  const [pesapalLoading, setPesapalLoading] = useState(false)
 
   useEffect(() => {
     fetch('/api/settings')
@@ -120,6 +121,31 @@ export default function CheckoutPage() {
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validateShipping()) setCurrentStep('review')
+  }
+
+  const handlePayWithPesaPal = async () => {
+    if (!orderNumber) return
+    setPesapalLoading(true)
+    try {
+      const res = await fetch('/api/pesapal/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber,
+          amount: finalTotal,
+          customerName: shippingData.fullName,
+          customerEmail: shippingData.email,
+          customerPhone: shippingData.phone,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to initiate payment')
+      window.location.href = data.redirect_url
+    } catch (err: unknown) {
+      setErrors({ submit: err instanceof Error ? err.message : 'PesaPal payment failed. Try manual payment below.' })
+    } finally {
+      setPesapalLoading(false)
+    }
   }
 
   const handlePlaceOrder = async () => {
@@ -255,9 +281,36 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* PesaPal — primary payment CTA */}
+                <div className="mb-6">
+                  {errors.submit && (
+                    <div className="mb-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">⚠️ {errors.submit}</div>
+                  )}
+                  <Button
+                    onClick={handlePayWithPesaPal}
+                    disabled={pesapalLoading}
+                    className="w-full py-4 h-auto text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl flex items-center justify-center gap-2 mb-2"
+                  >
+                    {pesapalLoading
+                      ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirecting to PesaPal…</>
+                      : <><CreditCard className="w-5 h-5" /> Pay KES {finalTotal.toLocaleString()} with PesaPal</>
+                    }
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Secure payment via M-Pesa, Visa, Mastercard & more through PesaPal
+                  </p>
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 border-t border-border" />
+                  <span className="text-xs text-muted-foreground">or pay manually</span>
+                  <div className="flex-1 border-t border-border" />
+                </div>
+
                 <div className="text-left mb-6">
                   <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-primary" /> Complete Your Payment
+                    <Phone className="w-4 h-4 text-primary" /> Manual Payment Options
                   </p>
                   <div className="space-y-2">
                     {storeSettings.payment_number && (

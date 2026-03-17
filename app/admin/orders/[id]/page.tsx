@@ -37,6 +37,8 @@ interface OrderDetail {
   total: number
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   paymentMethod: string
+  paymentStatus: string
+  pesapalTrackingId: string | null
   trackingNumber: string
   estimatedDelivery: string | null
   createdAt: string
@@ -404,6 +406,52 @@ export default function OrderDetailPage() {
                   </span>
                 </div>
               )}
+            </div>
+          </Card>
+
+          {/* Payment Status */}
+          <Card className="p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <CreditCard className="w-4 h-4" /> Payment Status
+            </h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${
+                  order.paymentStatus === 'completed'
+                    ? 'bg-green-100 text-green-800'
+                    : order.paymentStatus === 'failed'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    order.paymentStatus === 'completed'
+                      ? 'bg-green-500'
+                      : order.paymentStatus === 'failed'
+                        ? 'bg-red-500'
+                        : 'bg-yellow-500'
+                  }`} />
+                  {order.paymentStatus || 'Pending'}
+                </span>
+              </div>
+              {order.paymentMethod && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Method</span>
+                  <span className="font-medium capitalize">{order.paymentMethod}</span>
+                </div>
+              )}
+              {order.pesapalTrackingId && (
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">PesaPal Tracking ID</p>
+                  <p className="font-mono text-xs bg-muted rounded px-2 py-1 break-all">
+                    {order.pesapalTrackingId}
+                  </p>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold pt-1 border-t border-border">
+                <span>Total</span>
+                <span>KES {order.total.toLocaleString()}</span>
+              </div>
             </div>
           </Card>
         </div>
