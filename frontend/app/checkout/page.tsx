@@ -97,9 +97,9 @@ export default function CheckoutPage() {
     } catch { /* guest — skip */ }
   }, [])
 
-  const shippingFee = totalPrice >= 5000 ? 0 : 300
-  const taxAmount   = Math.round(totalPrice * 0.16 * 100) / 100
-  const finalTotal  = totalPrice + shippingFee + taxAmount
+  const shippingFee = 0
+  const taxAmount   = 0
+  const finalTotal  = totalPrice
 
   const setField   = (f: keyof ShippingData) => (v: string) => setShippingData((p) => ({ ...p, [f]: v }))
   const clearError = (n: string) => setErrors((p) => ({ ...p, [n]: '' }))
@@ -195,26 +195,11 @@ export default function CheckoutPage() {
           <span className="text-muted-foreground">Subtotal</span>
           <span className="text-foreground">KES {subtotal.toLocaleString()}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Shipping</span>
-          <span className={shippingFee === 0 ? 'text-green-600 font-semibold' : 'text-foreground'}>
-            {shippingFee === 0 ? 'FREE' : `KES ${shippingFee}`}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">VAT (16%)</span>
-          <span className="text-foreground">KES {taxAmount.toLocaleString()}</span>
-        </div>
       </div>
       <div className="flex justify-between items-center mb-3">
         <span className="font-bold text-foreground text-lg">Total</span>
         <span className="text-2xl font-bold text-primary">KES {finalTotal.toLocaleString()}</span>
       </div>
-      {shippingFee > 0 && (
-        <div className="text-xs text-muted-foreground bg-muted rounded-md p-2.5 text-center">
-          🎁 Add <strong className="text-foreground">KES {(5000 - subtotal).toLocaleString()}</strong> more for free shipping
-        </div>
-      )}
     </div>
   )
 
