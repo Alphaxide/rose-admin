@@ -61,7 +61,7 @@ export interface ShippingAddress {
 export interface CreateOrderPayload {
   items: { product_id: string; quantity: number }[]
   shipping_address: ShippingAddress
-  payment_method?: 'mpesa' | 'card' | 'cash'
+  payment_method?: 'mpesa' | 'card' | 'cash' | 'pesapal'
 }
 
 export interface CreateOrderResponse {

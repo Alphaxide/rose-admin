@@ -189,10 +189,13 @@ export default function CheckoutPage() {
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || 'Failed to initiate payment')
+        if (!data.redirect_url) throw new Error('PesaPal did not return a payment URL')
         window.location.href = data.redirect_url
-      } catch {
-        // PesaPal redirect failed — fall through to confirmation screen
-        // where the user can retry or pay manually
+      } catch (pesapalErr: unknown) {
+        // Show the real error on the confirmation screen so user knows what happened
+        const msg = pesapalErr instanceof Error ? pesapalErr.message : 'PesaPal payment failed'
+        console.error('[PesaPal initiate]', msg)
+        setErrors({ submit: msg })
         setCurrentStep('confirmation')
       } finally {
         setPesapalLoading(false)
