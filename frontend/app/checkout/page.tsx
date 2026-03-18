@@ -75,6 +75,7 @@ export default function CheckoutPage() {
     fullName: '', email: '', phone: '', address: '', city: '', postalCode: '',
   })
   const [pesapalLoading, setPesapalLoading] = useState(false)
+  const [confirmedTotal, setConfirmedTotal] = useState(0)
 
   useEffect(() => {
     fetch('/api/settings')
@@ -123,6 +124,7 @@ export default function CheckoutPage() {
     if (validateShipping()) setCurrentStep('review')
   }
 
+  // Called from confirmation screen to retry PesaPal when auto-redirect failed
   const handlePayWithPesaPal = async () => {
     if (!orderNumber) return
     setPesapalLoading(true)
@@ -132,7 +134,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber,
-          amount: finalTotal,
+          amount: confirmedTotal,
           customerName: shippingData.fullName,
           customerEmail: shippingData.email,
           customerPhone: shippingData.phone,
@@ -162,11 +164,39 @@ export default function CheckoutPage() {
           city:        shippingData.city,
           postal_code: shippingData.postalCode,
         },
-        payment_method: 'mpesa',
+        payment_method: 'pesapal',
       })
-      setOrderNumber(order.order_number)
+
+      const total = finalTotal
+      const orderNum = order.order_number
+      setConfirmedTotal(total)
+      setOrderNumber(orderNum)
       clearCart()
-      setCurrentStep('confirmation')
+
+      // Auto-redirect to PesaPal payment page
+      setPesapalLoading(true)
+      try {
+        const res = await fetch('/api/pesapal/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderNumber: orderNum,
+            amount: total,
+            customerName: shippingData.fullName,
+            customerEmail: shippingData.email,
+            customerPhone: shippingData.phone,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Failed to initiate payment')
+        window.location.href = data.redirect_url
+      } catch {
+        // PesaPal redirect failed — fall through to confirmation screen
+        // where the user can retry or pay manually
+        setCurrentStep('confirmation')
+      } finally {
+        setPesapalLoading(false)
+      }
     } catch (err: unknown) {
       setErrors({ submit: err instanceof Error ? err.message : 'Failed to place order. Please try again.' })
     } finally {
@@ -262,7 +292,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="border-t border-border pt-3 flex justify-between font-bold text-base">
                     <span className="text-foreground">Amount Due</span>
-                    <span className="text-primary">KES {finalTotal.toLocaleString()}</span>
+                    <span className="text-primary">KES {confirmedTotal.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -278,7 +308,7 @@ export default function CheckoutPage() {
                   >
                     {pesapalLoading
                       ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirecting to PesaPal…</>
-                      : <><CreditCard className="w-5 h-5" /> Pay KES {finalTotal.toLocaleString()} with PesaPal</>
+                      : <><CreditCard className="w-5 h-5" /> Pay KES {confirmedTotal.toLocaleString()} with PesaPal</>
                     }
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
@@ -312,11 +342,11 @@ export default function CheckoutPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Amount</p>
-                          <p className="font-bold text-primary">KES {finalTotal.toLocaleString()}</p>
+                          <p className="font-bold text-primary">KES {confirmedTotal.toLocaleString()}</p>
                         </div>
                       </div>
                     )}
-                    <a href={`https://wa.me/${storeSettings.whatsapp.replace(/\D/g, '')}?text=Hi!%20I%20placed%20order%20*${orderNumber}*%20for%20KES%20${finalTotal.toLocaleString()}.%20Please%20confirm%20payment.`}
+                    <a href={`https://wa.me/${storeSettings.whatsapp.replace(/\D/g, '')}?text=Hi!%20I%20placed%20order%20*${orderNumber}*%20for%20KES%20${confirmedTotal.toLocaleString()}.%20Please%20confirm%20payment.`}
                       target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-3 bg-muted rounded-lg p-4 border border-border hover:border-[#25D366] transition-colors">
                       <div className="w-10 h-10 bg-[#25D366] rounded-full flex items-center justify-center flex-shrink-0">
@@ -338,7 +368,7 @@ export default function CheckoutPage() {
                         <p className="text-xs text-muted-foreground">Mon–Sat, 8am–8pm</p>
                       </div>
                     </a>
-                    <a href={`mailto:${storeSettings.email}?subject=Order ${orderNumber}&body=Hi, I placed order ${orderNumber} for KES ${finalTotal.toLocaleString()}. Please confirm.`}
+                    <a href={`mailto:${storeSettings.email}?subject=Order ${orderNumber}&body=Hi, I placed order ${orderNumber} for KES ${confirmedTotal.toLocaleString()}. Please confirm.`}
                       className="flex items-center gap-3 bg-muted rounded-lg p-4 border border-border hover:border-blue-400 transition-colors">
                       <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                         <Mail className="w-5 h-5 text-white" />
@@ -432,17 +462,15 @@ export default function CheckoutPage() {
 
                     <div className="bg-card rounded-xl border border-border p-6">
                       <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                        <Phone className="w-5 h-5 text-primary" /> Payment
+                        <CreditCard className="w-5 h-5 text-primary" /> Payment
                       </h2>
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm space-y-1.5 text-amber-800">
-                        <p className="font-semibold">After placing your order you can pay via:</p>
-                        {storeSettings.payment_number && (
-                          <p>📱 <strong>M-Pesa {storeSettings.payment_type === 'paybill' ? 'Paybill' : 'Till'} {storeSettings.payment_number}</strong>{storeSettings.payment_type === 'paybill' ? ' — Account: your order number' : ''}</p>
-                        )}
-                        <p>💬 <strong>WhatsApp</strong> {storeSettings.phone}</p>
-                        <p>📞 <strong>Call</strong> {storeSettings.phone} (Mon–Sat 8am–8pm)</p>
-                        <p>📧 <strong>Email</strong> {storeSettings.email}</p>
-                        <p className="text-xs text-amber-600 pt-1">We confirm all orders within 30 minutes during business hours.</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800 space-y-1.5">
+                        <p className="font-semibold flex items-center gap-2">
+                          <CreditCard className="w-4 h-4" /> You will be redirected to PesaPal to complete payment
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          PesaPal accepts M-Pesa, Visa, Mastercard and more. Your order is saved if payment is interrupted.
+                        </p>
                       </div>
                     </div>
 
@@ -450,15 +478,17 @@ export default function CheckoutPage() {
                       <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">⚠️ {errors.submit}</div>
                     )}
 
-                    <Button onClick={handlePlaceOrder} disabled={isLoading}
+                    <Button onClick={handlePlaceOrder} disabled={isLoading || pesapalLoading}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground w-full py-4 h-auto text-base font-bold flex items-center justify-center gap-2 rounded-xl">
-                      {isLoading
-                        ? <><Loader2 className="w-5 h-5 animate-spin" /> Placing Order...</>
-                        : <>Place Order — KES {finalTotal.toLocaleString()}</>
+                      {pesapalLoading
+                        ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirecting to PesaPal…</>
+                        : isLoading
+                          ? <><Loader2 className="w-5 h-5 animate-spin" /> Placing Order…</>
+                          : <><CreditCard className="w-5 h-5" /> Pay KES {finalTotal.toLocaleString()} with PesaPal</>
                       }
                     </Button>
                     <p className="text-xs text-center text-muted-foreground">
-                      Payment collected after order confirmation via M-Pesa or direct contact.
+                      Secure payment via M-Pesa, Visa, Mastercard &amp; more through PesaPal
                     </p>
                   </div>
                 )}
