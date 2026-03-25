@@ -10,10 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'orderNumber and amount are required' }, { status: 400 })
     }
 
-    // Derive app URL from the incoming request — no env var needed
-    const { origin, host, protocol } = new URL(request.url)
-    const appUrl = origin || `${protocol}//${host}`
-
+    const appUrl = 'https://beautybyrose.co.ke'
     const ipnUrl = `${appUrl}/api/pesapal/ipn`
     const callbackUrl = `${appUrl}/payment-callback`
 
