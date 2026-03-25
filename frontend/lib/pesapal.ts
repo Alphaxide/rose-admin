@@ -29,15 +29,26 @@ export async function getPesaPalToken(): Promise<string> {
   }
 
   const data = await res.json()
+
+  if (!data.token) {
+    throw new Error(`PesaPal auth did not return a token: ${JSON.stringify(data)}`)
+  }
+
+  console.log('✅ PesaPal token acquired')
   _tokenCache = { token: data.token, expiresAt: Date.now() + 4 * 60 * 1000 }
   return data.token
 }
 
 // ─── IPN Registration ─────────────────────────────────────────────────────────
 export async function getOrRegisterIpnId(ipnUrl: string): Promise<string> {
-  if (_ipnIdCache) return _ipnIdCache
+  if (_ipnIdCache) {
+    console.log('✅ Using cached IPN ID:', _ipnIdCache)
+    return _ipnIdCache
+  }
 
   const token = await getPesaPalToken()
+
+  console.log('📡 Registering IPN URL:', ipnUrl)
 
   const res = await fetch(`${PESAPAL_BASE_URL}/api/URLSetup/RegisterIPN`, {
     method: 'POST',
@@ -55,7 +66,14 @@ export async function getOrRegisterIpnId(ipnUrl: string): Promise<string> {
   }
 
   const data = await res.json()
+  console.log('📡 IPN registration response:', JSON.stringify(data, null, 2))
+
+  if (!data.ipn_id) {
+    throw new Error(`PesaPal IPN registration did not return an ipn_id: ${JSON.stringify(data)}`)
+  }
+
   _ipnIdCache = data.ipn_id as string
+  console.log('✅ IPN ID registered:', _ipnIdCache)
   return _ipnIdCache!
 }
 
@@ -83,6 +101,23 @@ export async function submitPesaPalOrder(
 ): Promise<PesaPalOrderResult> {
   const token = await getPesaPalToken()
 
+  const payload = {
+    id: params.orderNumber,
+    currency: 'KES',
+    amount: params.amount,
+    description: params.description,
+    callback_url: params.callbackUrl,
+    notification_id: params.ipnId,
+    billing_address: {
+      email_address: params.email,
+      phone_number: params.phone,
+      first_name: params.firstName,
+      last_name: params.lastName,
+    },
+  }
+
+  console.log('📦 Submitting PesaPal order:', JSON.stringify(payload, null, 2))
+
   const res = await fetch(
     `${PESAPAL_BASE_URL}/api/Transactions/SubmitOrderRequest`,
     {
@@ -92,20 +127,7 @@ export async function submitPesaPalOrder(
         Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        id: params.orderNumber,
-        currency: 'KES',
-        amount: params.amount,
-        description: params.description,
-        callback_url: params.callbackUrl,
-        notification_id: params.ipnId,
-        billing_address: {
-          email_address: params.email,
-          phone_number: params.phone,
-          first_name: params.firstName,
-          last_name: params.lastName,
-        },
-      }),
+      body: JSON.stringify(payload),
     }
   )
 
@@ -114,7 +136,16 @@ export async function submitPesaPalOrder(
     throw new Error(`PesaPal order submission failed: ${txt}`)
   }
 
-  return (await res.json()) as PesaPalOrderResult
+  const data = await res.json()
+  console.log('🔍 PesaPal full response:', JSON.stringify(data, null, 2))
+
+  if (!data.redirect_url) {
+    throw new Error(
+      `PesaPal did not return a redirect URL. Full response: ${JSON.stringify(data)}`
+    )
+  }
+
+  return data as PesaPalOrderResult
 }
 
 // ─── Transaction Status ───────────────────────────────────────────────────────
