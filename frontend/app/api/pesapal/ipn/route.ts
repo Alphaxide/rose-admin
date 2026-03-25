@@ -1,6 +1,5 @@
 // PesaPal IPN (Instant Payment Notification) handler
 // PesaPal calls this URL via GET when a payment status changes.
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getPesaPalTransactionStatus } from '@/lib/pesapal'
@@ -16,11 +15,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch transaction status from PesaPal
     const txStatus = await getPesaPalTransactionStatus(orderTrackingId)
-
     const rawStatus = txStatus.payment_status_description?.toLowerCase() ?? 'pending'
-    // Map PesaPal statuses to our internal ones
+
     const paymentStatus =
       rawStatus === 'completed'
         ? 'completed'
@@ -30,10 +27,9 @@ export async function GET(request: NextRequest) {
             ? 'failed'
             : 'pending'
 
-    // Update the order in Supabase (needs service role to bypass RLS)
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      'https://your-project.supabase.co',        // 👈 replace with your Supabase URL
+      'your-supabase-service-role-key'            // 👈 replace with your service role key
     )
 
     await supabase
@@ -44,7 +40,6 @@ export async function GET(request: NextRequest) {
       })
       .eq('order_number', orderMerchantReference)
 
-    // PesaPal expects this exact response shape
     return NextResponse.json({
       orderNotificationType,
       orderTrackingId,
@@ -54,7 +49,6 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'IPN processing error'
     console.error('[pesapal/ipn]', msg)
-    // Still return 200 so PesaPal doesn't keep retrying for our internal errors
     return NextResponse.json({ error: msg, status: 500 }, { status: 200 })
   }
 }
