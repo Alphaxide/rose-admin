@@ -1,13 +1,8 @@
 // PesaPal API v3 helper — server-side only (used in API routes)
 
 const PESAPAL_BASE_URL = 'https://pay.pesapal.com/v3'
-
-function getCredentials() {
-  const key = process.env.PESAPAL_CONSUMER_KEY
-  const secret = process.env.PESAPAL_CONSUMER_SECRET
-  if (!key || !secret) throw new Error('PesaPal credentials not configured')
-  return { key, secret }
-}
+const PESAPAL_CONSUMER_KEY = 'BADBuK7CeKpA+mkUlHZA0gvVyPloWT95'
+const PESAPAL_CONSUMER_SECRET = 'mXy8zuN8xMrbgQ1ldM4NcgQQG/Y='
 
 // ─── In-memory caches (shared within one serverless instance) ─────────────────
 let _tokenCache: { token: string; expiresAt: number } | null = null
@@ -19,12 +14,13 @@ export async function getPesaPalToken(): Promise<string> {
     return _tokenCache.token
   }
 
-  const { key, secret } = getCredentials()
-
   const res = await fetch(`${PESAPAL_BASE_URL}/api/Auth/RequestToken`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ consumer_key: key, consumer_secret: secret }),
+    body: JSON.stringify({
+      consumer_key: PESAPAL_CONSUMER_KEY,
+      consumer_secret: PESAPAL_CONSUMER_SECRET,
+    }),
   })
 
   if (!res.ok) {
@@ -33,7 +29,6 @@ export async function getPesaPalToken(): Promise<string> {
   }
 
   const data = await res.json()
-  // Tokens expire in ~5 min; cache for 4 min
   _tokenCache = { token: data.token, expiresAt: Date.now() + 4 * 60 * 1000 }
   return data.token
 }
