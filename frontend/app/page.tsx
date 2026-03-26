@@ -10,12 +10,6 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { getProducts, getCategories, ApiProduct, ApiCategory } from '@/lib/api'
 
-const testimonials = [
-  { name: 'Sarah K.', rating: 5, text: 'Amazing quality products and fast delivery to Nairobi!', avatar: '👩‍🦰' },
-  { name: 'Jane M.', rating: 5, text: 'Best skincare I have found. My skin has transformed!', avatar: '👩' },
-  { name: 'Amira H.', rating: 5, text: 'Excellent customer service and genuine products.', avatar: '👩‍🦱' },
-]
-
 export default function Home() {
   const [categories, setCategories] = useState<ApiCategory[]>([])
   const [featuredProducts, setFeaturedProducts] = useState<ApiProduct[]>([])
@@ -243,37 +237,6 @@ export default function Home() {
                   </Button>
                 </div>
               )}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="bg-card py-12 px-4 my-8">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
-              What Our Customers Say
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((t, i) => (
-                <div
-                  key={i}
-                  className="bg-background rounded-md p-6 border border-border"
-                  style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">{t.avatar}</span>
-                    <div>
-                      <p className="font-semibold text-foreground">{t.name}</p>
-                      <div className="flex gap-1">
-                        {[...Array(t.rating)].map((_, j) => (
-                          <span key={j} className="text-primary text-sm">★</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground italic">"{t.text}"</p>
-                </div>
-              ))}
             </div>
           </div>
         </section>

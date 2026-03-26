@@ -7,7 +7,9 @@ import ProductCard from '@/components/ProductCard'
 import ProductFilters from '@/components/ProductFilters'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { getProducts, getCategories, ApiProduct, ApiCategory } from '@/lib/api'
+import { getProductsPaginated, getCategories, ApiProduct, ApiCategory } from '@/lib/api'
+
+const PAGE_SIZE = 24
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +21,9 @@ export default function ProductsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState('newest')
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalProducts, setTotalProducts] = useState(0)
 
   // Load categories once on mount
   useEffect(() => {
@@ -27,24 +32,35 @@ export default function ProductsPage() {
       .catch((e) => console.error('Failed to load categories:', e))
   }, [])
 
-  // Reload products whenever filters or sort change
+  // Reset to page 1 when filters/sort change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory, priceRange, sortBy])
+
+  // Reload products whenever filters, sort, or page change
   const loadProducts = useCallback(async () => {
     setIsLoading(true)
     try {
-      const data = await getProducts({
+      const result = await getProductsPaginated({
         category: selectedCategory ?? undefined,
         minPrice: priceRange[0] > 0 ? priceRange[0] : undefined,
         maxPrice: priceRange[1] < 10000 ? priceRange[1] : undefined,
         sortBy: sortBy as 'newest' | 'price-asc' | 'price-desc' | 'rating',
+        page: currentPage,
+        limit: PAGE_SIZE,
       })
-      setProducts(data)
+      setProducts(result.data)
+      setTotalPages(result.pagination.pages)
+      setTotalProducts(result.pagination.total)
     } catch (e) {
       console.error('Failed to load products:', e)
       setProducts([])
+      setTotalPages(1)
+      setTotalProducts(0)
     } finally {
       setIsLoading(false)
     }
-  }, [selectedCategory, priceRange, sortBy])
+  }, [selectedCategory, priceRange, sortBy, currentPage])
 
   useEffect(() => {
     loadProducts()
@@ -103,7 +119,9 @@ export default function ProductsPage() {
               {/* Sort + count bar */}
               <div className="flex items-center justify-between mb-5 pb-4 border-b border-border flex-wrap gap-3">
                 <p className="text-sm text-muted-foreground">
-                  {isLoading ? 'Loading...' : `${products.length} products`}
+                  {isLoading
+                    ? 'Loading...'
+                    : `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, totalProducts)} of ${totalProducts} products`}
                 </p>
                 <select
                   value={sortBy}
@@ -146,6 +164,51 @@ export default function ProductsPage() {
                     }}
                   >
                     Clear Filters
+                  </Button>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {!isLoading && totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+                    .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
+                      if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('ellipsis')
+                      acc.push(p)
+                      return acc
+                    }, [])
+                    .map((item, idx) =>
+                      item === 'ellipsis' ? (
+                        <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">…</span>
+                      ) : (
+                        <Button
+                          key={item}
+                          variant={currentPage === item ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setCurrentPage(item as number)}
+                        >
+                          {item}
+                        </Button>
+                      )
+                    )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                  >
+                    Next
                   </Button>
                 </div>
               )}
