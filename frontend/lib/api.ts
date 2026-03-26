@@ -181,7 +181,7 @@ export async function getProductsPaginated(filters?: {
   if (filters?.maxPrice !== undefined) params.set('maxPrice', String(filters.maxPrice))
   if (filters?.sortBy)    params.set('sortBy', filters.sortBy)
   if (filters?.page)      params.set('page', String(filters.page ?? 1))
-  if (filters?.limit)     params.set('limit', String(filters.limit ?? 20))
+  if (filters?.limit)     params.set('limit', String(filters.limit ?? 300))
 
   const qs = params.toString()
   return apiFetch<PaginatedProducts>(`/products${qs ? `?${qs}` : ''}`)
